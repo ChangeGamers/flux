@@ -118,11 +118,14 @@ spec:
         - --ssh-keygen-dir=/var/fluxd/keygen
 
         # Replace or remove the following URL.
-        - --git-url=git@github.com:weaveworks/flux-get-started
+        - --git-url=git@github.com:ChangeGamers/kubernetes.git
         - --git-branch=master
         # include this if you want to restrict the manifests considered by flux
         # to those under the following relative paths in the git repository
         # - --git-path=subdir1,subdir2
+        - --git-path=dev
+        - --manifest-generation=true 
+        - --registry-exclude-image=gcr.io/cloudsql/*,hub.docker.com/*,docker.io/*,k8s.gcr.io/*
 
         # Include these two to enable git commit signing
         # - --git-gpg-key-import=/root/gpg-import

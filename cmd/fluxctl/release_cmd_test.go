@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/weaveworks/flux/resource"
-	"github.com/weaveworks/flux/update"
+	"github.com/fluxcd/flux/pkg/resource"
+	"github.com/fluxcd/flux/pkg/update"
 )
 
 func TestReleaseCommand_CLIConversion(t *testing.T) {
@@ -57,7 +57,7 @@ func TestReleaseCommand_CLIConversion(t *testing.T) {
 			t.Fatal("Failed to decode spec")
 		}
 		if !reflect.DeepEqual(v.expectedSpec, actualSpec.Spec) {
-			t.Fatalf("Expected %#v but got %#v", v.expectedSpec, actualSpec)
+			t.Fatalf("Expected %#v but got %#v", v.expectedSpec, actualSpec.Spec)
 		}
 
 		// Check that GetRelease was polled for status

@@ -10,7 +10,7 @@ We gratefully welcome improvements to issues and documentation as well as to cod
 ## Working on issues
 
 If you like Flux and want to get involved in the project, a great way to get started
-is reviewing our [blocked-needs-validation](https://github.com/weaveworks/flux/issues?q=is%3Aissue+is%3Aopen+label%3Ablocked-needs-validation) issues.
+is reviewing our [blocked-needs-validation](https://github.com/fluxcd/flux/issues?q=is%3Aissue+is%3Aopen+label%3Ablocked-needs-validation) issues.
 
 The idea here is that new issues are confirmed, which might require asking
 for more information, testing with a fresh Flux environment. Once confirmed,
@@ -18,8 +18,8 @@ the `blocked-needs-validation` label is removed, and the issue can be worked
 on.
 
 To set up Flux to test things, there's documentation about setting up a
-[standalone install](site/get-started.md) and a [Helm
-install](site/helm-get-started.md), which might be helpful.
+[standalone install](docs/tutorials/get-started.md) and a [Helm
+install](docs/tutorials/get-started-helm.md), which might be helpful.
 
 Please talk to us on Slack, if you should get stuck anywhere. We appreciate
 any help and look forward to talking to you soon!
@@ -35,14 +35,14 @@ contribution. No action from you is required, but it's a good idea to see the
 ## Communications
 
 The project uses Slack: To join the conversation, simply join the
-[Weave community](https://slack.weave.works/) Slack workspace and use the
-[#flux](https://weave-community.slack.com/messages/flux/) channel.
+[CNCF](https://slack.cncf.io/) Slack workspace and use the
+[#flux](https://cloud-native.slack.com/messages/flux/) channel.
 
 The Flux developers use a mailing list to discuss development as well.
-Simply subscribe to [flux-dev on Google
-Groups](https://groups.google.com/forum/#!forum/flux-dev) to join the
-conversation (this will also add an invitation to your Google calendar
-for our [Flux meeting](https://github.com/weaveworks/flux/wiki/Meeting)).
+Simply subscribe to [flux-dev on cncf.io](https://lists.cncf.io/g/cncf-flux-dev)
+to join the conversation (this will also add an invitation to your
+Google calendar for our [Flux
+meeting](https://docs.google.com/document/d/1l_M0om0qUEN_NNiGgpqJ2tvsF2iioHkaARDeh6b70B0/edit#)).
 
 ## Getting Started
 
@@ -52,8 +52,8 @@ for our [Flux meeting](https://github.com/weaveworks/flux/wiki/Meeting)).
 - If you want to contribute as a developer, continue reading this document for further instructions
 - If you are a new contributor, the following two issue labels might be
   interesting to you:
-  - [size/small](https://github.com/weaveworks/flux/issues?q=is%3Aissue+is%3Aopen+label%3Asize%2Fsmall)
-  - [help wanted](https://github.com/weaveworks/flux/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+  - [size/small](https://github.com/fluxcd/flux/issues?q=is%3Aissue+is%3Aopen+label%3Asize%2Fsmall)
+  - [help wanted](https://github.com/fluxcd/flux/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 - If you have questions, concerns, get stuck or need a hand, let us know
   on the Slack channel. We are happy to help and look forward to having
   you part of the team. No matter in which capacity.
@@ -73,10 +73,10 @@ This is a rough outline of how to prepare a contribution:
 
 ### How to build and run the project
 
-Refer to the [building doc](site/building.md) to find out how to build from
+Refer to the [building doc](docs/contributing/building.md) to find out how to build from
 source.
 
-Refer to the [Get Started Developing](site/get-started-developing.md) guide for a walkthrough on developing Flux locally.
+Refer to the [Get Started Developing](docs/contributing/get-started-developing.md) guide for a walkthrough on developing Flux locally.
 
 ### How to run the test suite
 

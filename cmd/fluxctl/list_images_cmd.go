@@ -8,11 +8,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/weaveworks/flux/api/v10"
-	"github.com/weaveworks/flux/api/v6"
-	"github.com/weaveworks/flux/registry"
-	"github.com/weaveworks/flux/resource"
-	"github.com/weaveworks/flux/update"
+	"github.com/fluxcd/flux/pkg/api/v10"
+	"github.com/fluxcd/flux/pkg/api/v6"
+	"github.com/fluxcd/flux/pkg/registry"
+	"github.com/fluxcd/flux/pkg/resource"
+	"github.com/fluxcd/flux/pkg/update"
 )
 
 type imageListOpts struct {
@@ -36,7 +36,7 @@ func (opts *imageListOpts) Command() *cobra.Command {
 		Example: makeExample("fluxctl list-images --namespace default --workload=deployment/foo"),
 		RunE:    opts.RunE,
 	}
-	cmd.Flags().StringVarP(&opts.namespace, "namespace", "n", "", "Namespace")
+	cmd.Flags().StringVarP(&opts.namespace, "namespace", "n", getKubeConfigContextNamespace(""), "Namespace")
 	cmd.Flags().StringVarP(&opts.workload, "workload", "w", "", "Show images for this workload")
 	cmd.Flags().IntVarP(&opts.limit, "limit", "l", 10, "Number of images to show (0 for all)")
 

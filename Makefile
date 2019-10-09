@@ -1,5 +1,5 @@
 .DEFAULT: all
-.PHONY: all release-bins clean realclean test integration-test check-generated
+.PHONY: all release-bins clean realclean test integration-test generate-deploy check-generated
 
 SUDO := $(shell docker info > /dev/null 2> /dev/null || echo "sudo")
 
@@ -18,21 +18,18 @@ endif
 CURRENT_OS_ARCH=$(shell echo `go env GOOS`-`go env GOARCH`)
 GOBIN?=$(shell echo `go env GOPATH`/bin)
 
-# NB because this outputs absolute file names, you have to be careful
-# if you're testing out the Makefile with `-W` (pretend a file is
-# new); use the full path to the pretend-new file, e.g.,
-#  `make -W $PWD/registry/registry.go`
-godeps=$(shell go list -f '{{join .Deps "\n"}}' $1 | grep -v /vendor/ | xargs go list -f '{{if not .Standard}}{{ $$dep := . }}{{range .GoFiles}}{{$$dep.Dir}}/{{.}} {{end}}{{end}}')
+godeps=$(shell go list -deps -f '{{if not .Standard}}{{ $$dep := . }}{{range .GoFiles}}{{$$dep.Dir}}/{{.}} {{end}}{{end}}' $(1) | sed "s%${PWD}/%%g")
 
-FLUXD_DEPS:=$(call godeps,./cmd/fluxd)
-FLUXCTL_DEPS:=$(call godeps,./cmd/fluxctl)
-HELM_OPERATOR_DEPS:=$(call godeps,./cmd/helm-operator)
+FLUXD_DEPS:=$(call godeps,./cmd/fluxd/...)
+FLUXCTL_DEPS:=$(call godeps,./cmd/fluxctl/...)
 
 IMAGE_TAG:=$(shell ./docker/image-tag)
 VCS_REF:=$(shell git rev-parse HEAD)
 BUILD_DATE:=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
-all: $(GOBIN)/fluxctl $(GOBIN)/fluxd $(GOBIN)/helm-operator build/.flux.done build/.helm-operator.done
+DOCS_PORT:=8000
+
+all: $(GOBIN)/fluxctl $(GOBIN)/fluxd build/.flux.done
 
 release-bins:
 	for arch in amd64; do \
@@ -55,30 +52,25 @@ realclean: clean
 	rm -rf ./cache
 
 test: test/bin/helm test/bin/kubectl test/bin/kustomize
-	PATH="${PWD}/bin:${PWD}/test/bin:${PATH}" go test ${TEST_FLAGS} $(shell go list ./... | grep -v "^github.com/weaveworks/flux/vendor" | sort -u)
+	PATH="${PWD}/bin:${PWD}/test/bin:${PATH}" go test ${TEST_FLAGS} $(shell go list ./... | grep -v "^github.com/fluxcd/flux/vendor" | sort -u)
 
-e2e: test/bin/helm test/bin/kubectl build/.flux.done build/.helm-operator.done
+e2e: test/bin/helm test/bin/kubectl build/.flux.done
 	PATH="${PWD}/test/bin:${PATH}" CURRENT_OS_ARCH=$(CURRENT_OS_ARCH) test/e2e/run.sh
 
 build/.%.done: docker/Dockerfile.%
 	mkdir -p ./build/docker/$*
 	cp $^ ./build/docker/$*/
-	$(SUDO) docker build -t docker.io/weaveworks/$* -t docker.io/weaveworks/$*:$(IMAGE_TAG) \
+	$(SUDO) docker build -t docker.io/fluxcd/$* -t docker.io/fluxcd/$*:$(IMAGE_TAG) \
 		--build-arg VCS_REF="$(VCS_REF)" \
 		--build-arg BUILD_DATE="$(BUILD_DATE)" \
 		-f build/docker/$*/Dockerfile.$* ./build/docker/$*
 	touch $@
 
 build/.flux.done: build/fluxd build/kubectl build/kustomize docker/ssh_config docker/kubeconfig docker/known_hosts.sh
-build/.helm-operator.done: build/helm-operator build/kubectl build/helm docker/ssh_config docker/known_hosts.sh docker/helm-repositories.yaml
 
 build/fluxd: $(FLUXD_DEPS)
 build/fluxd: cmd/fluxd/*.go
 	CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} go build -o $@ $(LDFLAGS) -ldflags "-X main.version=$(shell ./docker/image-tag)" ./cmd/fluxd
-
-build/helm-operator: $(HELM_OPERATOR_DEPS)
-build/helm-operator: cmd/helm-operator/*.go
-	CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} go build -o $@ $(LDFLAGS) -ldflags "-X main.version=$(shell ./docker/image-tag)" ./cmd/helm-operator
 
 build/kubectl: cache/linux-$(ARCH)/kubectl-$(KUBECTL_VERSION)
 test/bin/kubectl: cache/$(CURRENT_OS_ARCH)/kubectl-$(KUBECTL_VERSION)
@@ -96,7 +88,7 @@ build/kubectl test/bin/kubectl build/kustomize test/bin/kustomize build/helm tes
 cache/%/kubectl-$(KUBECTL_VERSION): docker/kubectl.version
 	mkdir -p cache/$*
 	curl --fail -L -o cache/$*/kubectl-$(KUBECTL_VERSION).tar.gz "https://dl.k8s.io/$(KUBECTL_VERSION)/kubernetes-client-$*.tar.gz"
-	[ $* != "linux-$(ARCH)" ] || echo "$(KUBECTL_CHECKSUM_$(ARCH))  cache/$*/kubectl-$(KUBECTL_VERSION).tar.gz" | shasum -a 256 -c
+	[ $* != "linux-$(ARCH)" ] || echo "$(KUBECTL_CHECKSUM_$(ARCH))  cache/$*/kubectl-$(KUBECTL_VERSION).tar.gz" | shasum -a 512 -c
 	tar -m --strip-components 3 -C ./cache/$* -xzf cache/$*/kubectl-$(KUBECTL_VERSION).tar.gz kubernetes/client/bin/kubectl
 	mv ./cache/$*/kubectl $@
 
@@ -113,21 +105,29 @@ cache/%/helm-$(HELM_VERSION): docker/helm.version
 	mv cache/$*/helm $@
 
 $(GOBIN)/fluxctl: $(FLUXCTL_DEPS)
-$(GOBIN)/fluxctl: ./cmd/fluxctl/*.go
 	go install ./cmd/fluxctl
 
 $(GOBIN)/fluxd: $(FLUXD_DEPS)
-$(GOBIN)/fluxd: cmd/fluxd/*.go
 	go install ./cmd/fluxd
-
-$(GOBIN)/helm-operator: $(HELM_OPERATOR_DEPS)
-$(GOBIN)/help-operator: cmd/helm-operator/*.go
-	go install ./cmd/helm-operator
 
 integration-test: all
 	test/bin/test-flux
 
-check-generated:
-	./bin/helm/update_codegen.sh
-	git diff --exit-code -- integrations/apis intergrations/client
+generate-deploy: pkg/install/generated_templates.gogen.go
+	cd deploy && go run ../pkg/install/generate.go deploy
 
+pkg/install/generated_templates.gogen.go: pkg/install/templates/*
+	cd pkg/install && go run generate.go embedded-templates
+
+check-generated: generate-deploy pkg/install/generated_templates.gogen.go
+	git diff --exit-code -- integrations/apis integrations/client pkg/install/generated_templates.gogen.go
+
+build-docs:
+	@cd docs && docker build -t flux-docs .
+
+test-docs: build-docs
+	@docker run -it flux-docs /usr/bin/linkchecker _build/html/index.html
+
+serve-docs: build-docs
+	@echo Stating docs website on http://localhost:${DOCS_PORT}/_build/html/index.html
+	@docker run -i -p ${DOCS_PORT}:8000 -e USER_ID=$$UID flux-docs

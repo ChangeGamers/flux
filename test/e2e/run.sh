@@ -26,7 +26,7 @@ function defer() {
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 SCRIPT_DIR="${REPO_ROOT}/test/e2e"
-KIND_VERSION="v0.4.0"
+KIND_VERSION="v0.5.1"
 CACHE_DIR="${REPO_ROOT}/cache/$CURRENT_OS_ARCH"
 KIND_CACHE_PATH="${CACHE_DIR}/kind-$KIND_VERSION"
 KIND_CLUSTER=flux-e2e
@@ -76,8 +76,7 @@ kubectl -n "${FLUX_NAMESPACE}" rollout status deployment/gitsrv
 
 if [ "${USING_KIND}" = 'true' ]; then
     echo '>>> Loading images into the Kind cluster'
-    kind --name "${KIND_CLUSTER}" load docker-image 'docker.io/weaveworks/flux:latest'
-    kind --name "${KIND_CLUSTER}" load docker-image 'docker.io/weaveworks/helm-operator:latest'
+    kind --name "${KIND_CLUSTER}" load docker-image 'docker.io/fluxcd/flux:latest'
 fi
 
 echo '>>> Installing Flux with Helm'
@@ -100,6 +99,7 @@ defer helm delete --purge flux > /dev/null 2>&1
 
 helm install --name flux --wait \
 --namespace "${FLUX_NAMESPACE}" \
+--set image.repository=docker.io/fluxcd/flux \
 --set image.tag=latest \
 --set git.url=ssh://git@gitsrv/git-server/repos/cluster.git \
 --set git.secretName=ssh-git \
@@ -107,7 +107,6 @@ helm install --name flux --wait \
 --set git.config.secretName=gitconfig \
 --set git.config.enabled=true \
 --set-string git.config.data="${GITCONFIG}" \
---set helmOperator.tag=latest \
 --set helmOperator.create=true \
 --set helmOperator.createCRD=true \
 --set helmOperator.git.secretName=ssh-git \
@@ -142,7 +141,7 @@ until ${ok}; do
     fi
 done
 
-echo -n ">>> Waiting for namespace ${DEMO_NAMESPACE} "
+echo -n ">>> Waiting for namespace ${DEMO_NAMESPACE}"
 retries=24
 count=1
 ok=false
@@ -176,7 +175,7 @@ until ${ok}; do
 done
 echo ' done'
 
-echo -n '>>> Waiting for Helm release mongodb '
+echo -n '>>> Waiting for Helm release mongodb'
 retries=24
 count=0
 ok=false
@@ -187,7 +186,6 @@ until ${ok}; do
     count=$(($count + 1))
     if [[ ${count} -eq ${retries} ]]; then
         kubectl -n "${FLUX_NAMESPACE}" logs deployment/flux
-        kubectl -n "${FLUX_NAMESPACE}" logs deployment/flux-helm-operator
         echo ' No more retries left'
         exit 1
     fi
@@ -196,9 +194,6 @@ echo ' done'
 
 echo '>>> Flux logs'
 kubectl -n "${FLUX_NAMESPACE}" logs deployment/flux
-
-echo '>>> Helm Operator logs'
-kubectl -n "${FLUX_NAMESPACE}" logs deployment/flux-helm-operator
 
 echo '>>> List pods'
 kubectl -n "${DEMO_NAMESPACE}" get pods

@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/weaveworks/flux/policy"
-	"github.com/weaveworks/flux/resource"
-	"github.com/weaveworks/flux/update"
+	"github.com/fluxcd/flux/pkg/policy"
+	"github.com/fluxcd/flux/pkg/resource"
+	"github.com/fluxcd/flux/pkg/update"
 )
 
 type workloadPolicyOpts struct {
@@ -60,7 +60,7 @@ containers which aren't explicitly named.
 	AddOutputFlags(cmd, &opts.outputOpts)
 	AddCauseFlags(cmd, &opts.cause)
 	flags := cmd.Flags()
-	flags.StringVarP(&opts.namespace, "namespace", "n", "default", "Workload namespace")
+	flags.StringVarP(&opts.namespace, "namespace", "n", getKubeConfigContextNamespace("default"), "Workload namespace")
 	flags.StringVarP(&opts.workload, "workload", "w", "", "Workload to modify")
 	flags.StringVar(&opts.tagAll, "tag-all", "", "Tag filter pattern to apply to all containers")
 	flags.StringSliceVar(&opts.tags, "tag", nil, "Tag filter container/pattern pairs")
@@ -120,7 +120,7 @@ func (opts *workloadPolicyOpts) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	return await(ctx, cmd.OutOrStdout(), cmd.OutOrStderr(), opts.API, jobID, false, opts.verbosity)
+	return await(ctx, cmd.OutOrStdout(), cmd.OutOrStderr(), opts.API, jobID, false, opts.verbosity, opts.Timeout)
 }
 
 func calculatePolicyChanges(opts *workloadPolicyOpts) (resource.PolicyUpdate, error) {

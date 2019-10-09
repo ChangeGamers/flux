@@ -1,4 +1,95 @@
-## 0.11.0 (2019-06-27)
+## 0.15.0 (2019-10-07)
+
+**Note** The Helm Operator options will be **removed** from this chart in the next major release.
+Please see the [install instruction](https://github.com/fluxcd/helm-operator/tree/master/chart/helm-operator)
+for Helm Operator v1.0.0. To keep using the same SSH key as Flux see the docs
+[here](https://github.com/fluxcd/helm-operator/tree/master/chart/helm-operator#use-fluxs-git-deploy-key).
+The upgrade procedure for `HelmReleases` from `v1beta1` to `v1` can be found
+[here](https://docs.fluxcd.io/projects/helm-operator/en/latest/guides/upgrading-to-ga.html).
+
+### Improvements
+
+ - Updated Flux to `1.15.0`
+   [fluxcd/flux#2490](https://github.com/fluxcd/flux/pull/2490)
+ - Support secure Git over HTTPS using credentials from environment variables
+   [fluxcd/flux#2470](https://github.com/fluxcd/flux/pull/2470)
+ - Make sync operations timeout configurable with the `sync.timeout` option
+   [fluxcd/flux#2481](https://github.com/fluxcd/flux/pull/2481)
+
+### Bug fixes
+
+ - Mount AKS service principal through secret instead of hostPath for ACR support
+   [fluxcd/flux#2437](https://github.com/fluxcd/flux/pull/2437)
+   [fluxcd/flux#2434](https://github.com/fluxcd/flux/pull/2434)
+   
+## 0.14.1 (2019-09-04)
+
+### Improvements
+
+ - Updated Flux to `1.14.2`
+   [fluxcd/flux#2419](https://github.com/fluxcd/flux/pull/2419)
+
+## 0.14.0 (2019-08-22)
+
+### Improvements
+
+ - Updated Flux to `1.14.1`
+   [fluxcd/flux#2401](https://github.com/fluxcd/flux/pull/2401)
+ - Add the ability to disable memcached and set an external memcached service
+   [fluxcd/flux#2393](https://github.com/fluxcd/flux/pull/2393)
+
+## 0.13.0 (2019-08-21)
+
+### Improvements
+
+**Note** The Flux chart is now hosted at `https://charts.fluxcd.io`
+
+ - Updated Flux to `1.14.0`
+   [fluxcd/flux#2380](https://github.com/fluxcd/flux/pull/2380)
+ - Add `git.readonly` option to chart
+   [fluxcd/flux#1807](https://github.com/fluxcd/flux/pull/1807)
+ - Helm chart repository has been changed to `charts.fluxcd.io`
+   [fluxcd/flux#2341](https://github.com/fluxcd/flux/pull/2341)
+
+## 0.12.0 (2019-08-08)
+
+### Improvements
+
+ - Updated Flux to `1.13.3` and the Helm operator to `0.10.1`
+   [fluxcd/flux#2296](https://github.com/fluxcd/flux/pull/2296)
+   [fluxcd/flux#2318](https://github.com/fluxcd/flux/pull/2318)
+ - Add manifest generation to helm chart
+   [fluxcd/flux#2332](https://github.com/fluxcd/flux/pull/2332)
+   [fluxcd/flux#2335](https://github.com/fluxcd/flux/pull/2335)
+ - Let a named cluster role be used in chart
+   [fluxcd/flux#2266](https://github.com/fluxcd/flux/pull/2266)
+
+## 0.11.0 (2019-07-10)
+
+### Improvements
+
+ - Updated Flux to `1.13.2` and the Helm operator to `0.10.0`
+   [fluxcd/flux#2235](https://github.com/fluxcd/flux/pull/2235)
+   [fluxcd/flux#2237](https://github.com/fluxcd/flux/pull/2237)
+ - Changed from DockerHub organization `weaveworks` -> `fluxcd`
+   [fluxcd/flux#2224](https://github.com/fluxcd/flux/pull/2224)
+ - Updated `HelmRelease` CRD to support rollbacks
+   [fluxcd/flux#2006](https://github.com/fluxcd/flux/pull/2006)
+ - Allow namespace scoping for both Flux and the Helm operator
+   [fluxcd/flux#2206](https://github.com/fluxcd/flux/pull/2206)
+   [fluxcd/flux#2209](https://github.com/fluxcd/flux/pull/2209)
+ - Removed long deprecated `FluxHelmRelease` CRD and disabled CRD
+   creation as the default to follow our own best practices
+   [fluxcd/flux#2190](https://github.com/fluxcd/flux/pull/2190)
+ - Enable `PodSecurityPolicy`
+   [fluxcd/flux#2223](https://github.com/fluxcd/flux/pull/2223)
+   [fluxcd/flux#2225](https://github.com/fluxcd/flux/pull/2225)
+ - Support new Flux `--registry-use-labels` flag (`registry.useTimestampLabels`)
+   [fluxcd/flux#2176](https://github.com/fluxcd/flux/pull/2176)
+ - Support new Helm operator `--workers` flag (`helmOperator.workers`)
+   [fluxcd/flux#2236](https://github.com/fluxcd/flux/pull/2236)
+
+## 0.10.2 (2019-06-27)
 
 ### Improvements
 

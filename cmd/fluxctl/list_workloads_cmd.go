@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/weaveworks/flux/api/v6"
-	"github.com/weaveworks/flux/policy"
+	"github.com/fluxcd/flux/pkg/api/v6"
+	"github.com/fluxcd/flux/pkg/policy"
 )
 
 type workloadListOpts struct {
@@ -30,7 +30,7 @@ func (opts *workloadListOpts) Command() *cobra.Command {
 		Example: makeExample("fluxctl list-workloads"),
 		RunE:    opts.RunE,
 	}
-	cmd.Flags().StringVarP(&opts.namespace, "namespace", "n", "default", "Confine query to namespace")
+	cmd.Flags().StringVarP(&opts.namespace, "namespace", "n", getKubeConfigContextNamespace("default"), "Confine query to namespace")
 	cmd.Flags().BoolVarP(&opts.allNamespaces, "all-namespaces", "a", false, "Query across all namespaces")
 	return cmd
 }

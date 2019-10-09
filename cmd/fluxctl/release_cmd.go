@@ -8,12 +8,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/weaveworks/flux/api/v11"
-	"github.com/weaveworks/flux/api/v6"
-	"github.com/weaveworks/flux/cluster"
-	"github.com/weaveworks/flux/job"
-	"github.com/weaveworks/flux/resource"
-	"github.com/weaveworks/flux/update"
+	"github.com/fluxcd/flux/pkg/api/v11"
+	"github.com/fluxcd/flux/pkg/api/v6"
+	"github.com/fluxcd/flux/pkg/cluster"
+	"github.com/fluxcd/flux/pkg/job"
+	"github.com/fluxcd/flux/pkg/resource"
+	"github.com/fluxcd/flux/pkg/update"
 )
 
 type workloadReleaseOpts struct {
@@ -53,7 +53,7 @@ func (opts *workloadReleaseOpts) Command() *cobra.Command {
 
 	AddOutputFlags(cmd, &opts.outputOpts)
 	AddCauseFlags(cmd, &opts.cause)
-	cmd.Flags().StringVarP(&opts.namespace, "namespace", "n", "default", "Workload namespace")
+	cmd.Flags().StringVarP(&opts.namespace, "namespace", "n", getKubeConfigContextNamespace("default"), "Workload namespace")
 	// Note: we cannot define a shorthand for --workload since it clashes with the shorthand of --watch
 	cmd.Flags().StringSliceVarP(&opts.workloads, "workload", "", []string{}, "List of workloads to release <namespace>:<kind>/<name>")
 	cmd.Flags().BoolVar(&opts.allWorkloads, "all", false, "Release all workloads")
@@ -162,7 +162,7 @@ func (opts *workloadReleaseOpts) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	result, err := awaitJob(ctx, opts.API, jobID)
+	result, err := awaitJob(ctx, opts.API, jobID, opts.Timeout)
 	if err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func (opts *workloadReleaseOpts) RunE(cmd *cobra.Command, args []string) error {
 		opts.dryRun = false
 	}
 
-	err = await(ctx, cmd.OutOrStdout(), cmd.OutOrStderr(), opts.API, jobID, !opts.dryRun, opts.verbosity)
+	err = await(ctx, cmd.OutOrStdout(), cmd.OutOrStderr(), opts.API, jobID, !opts.dryRun, opts.verbosity, opts.Timeout)
 	if !opts.watch || err != nil {
 		return err
 	}

@@ -146,7 +146,7 @@ spec:
         # Include this if you want to restrict the manifests considered by flux
         # to those under the following relative paths in the git repository
         # - --git-path=subdir1,subdir2
-        - --git-path=dev,staging
+        - --git-path=staging
         - --manifest-generation=true 
         - --registry-exclude-image=gcr.io/cloudsql/*,hub.docker.com/*,docker.io/*,k8s.gcr.io/*
 
